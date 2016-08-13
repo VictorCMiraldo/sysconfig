@@ -1,0 +1,4 @@
+#! /bin/bash
+
+MOD=$(pactl list short modules | grep module-loopback | grep source=bluez_source.0C_A6_94_7B_8C_BB | cut -f 1)
+pactl unload-module $MOD

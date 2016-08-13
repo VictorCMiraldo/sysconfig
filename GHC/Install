@@ -1,0 +1,12 @@
+#! /bin/bash
+
+##
+## GHC and agda are handled by another script. 
+## Here we just decide to call it or not.
+##
+echo "-- GHC stuff:"
+A=$HOME/var/state/tools.haskell-libs
+GHC__STATE=$( (test -e $A && cat $HOME/var/state/tools.haskell-libs) || echo "0")
+if [[ ! "$GHC__STATE" -eq "1" ]]; then
+  bash $HOME/config/GHC/InstallLibraries
+fi

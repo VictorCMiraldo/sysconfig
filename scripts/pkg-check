@@ -1,0 +1,62 @@
+#! /bin/bash
+
+showHelp() {
+  echo "usage: pkg-check -f <filewithpkgs>"
+  echo "       pkg-check <pkgname>"
+  echo ""
+  echo "  pkg-check <pkg> will return 0 if there is"
+  echo "  a candidate version for <pkg> to be installed"
+  echo "  within apt."
+  echo ""
+  echo "  When in file mode, pkg-check will read pkgnames"
+  echo "  from file, one per line. It returns 0 when ALL"
+  echo "  packages are available for install."
+}
+
+FILEMODE=""
+PKGNAME=""
+while [[ $# > 0 ]]; do
+  key=$1
+  
+  case $key in
+    -f|--file)
+      FILEMODE="$2"
+      shift
+      shift
+    ;;
+    
+    -h|--help)
+      showHelp
+      exit 0
+    ;;
+    
+    *)
+      PKGNAME="$key"
+    ;;
+  esac
+  shift
+done
+
+checkOne() {
+  local RES
+  
+  RES=$(apt-cache policy $1 | grep "Candidate:")
+  if [ ! -z "$RES" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+if [ -z "$FILEMODE" ]; then
+  checkOne $PKGNAME
+else
+  for pkg in $(cfg-linesof $FILEMODE); do
+    checkOne $pkg
+    if [ "$?" -gt "0" ]; then
+      echo "!!! $pkg : No candidate for installation found"
+      exit 1
+    fi
+  done
+fi
+    

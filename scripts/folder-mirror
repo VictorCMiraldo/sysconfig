@@ -1,0 +1,58 @@
+#! /bin/bash
+
+function print_usage() {
+  echo "usage: folder-backup <folder> <dst> <additional rsync opts>"
+  echo ""
+  echo "    <folder> is relative to $HOME."
+  echo "    <dst> is the absolute path of the"
+  echo "          destination"
+  exit 1
+}
+
+if [[ $# -lt 2 ]]; then
+  print_usage
+fi
+
+SRC=$1
+DST=$2
+
+case $SRC in
+  -h|--help)
+    print_usage
+  ;;
+esac
+
+RSYNC_OPTS="-rtpEh --progress --delete --safe-links --preallocate --exclude-from=$HOME/config/rsync/folder-backup.exc --include-from=$HOME/config/rsync/folder-backup.inc ${@:3}"
+
+if [ ! -e $HOME/$SRC ]; then
+  echo "!! Source does not exist."
+  echo "   Aborting."
+  exit 1
+fi
+
+if [ ! -e $DST ]; then
+  echo "!! Destination does not exist."
+  echo "   Aborting."
+  exit 1
+fi
+
+if [ ! -e "$DST/$(basename $HOME/$SRC)" ]; then
+  echo "!! the destination $DST/$(basename $HOME/$SRC)"
+  echo "   does not exist."
+  echo "   rsync will create it, no worries."
+  echo ""
+  read -p "continue (y/n) ? " ans
+  case $ans in
+    [Nn])
+      exit 1
+    ;;
+  esac
+fi
+
+rsync $RSYNC_OPTS $HOME/$SRC $DST
+
+
+
+
+
+

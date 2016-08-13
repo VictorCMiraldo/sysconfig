@@ -1,0 +1,24 @@
+#! /bin/bash
+
+### GNUPG Home Directory
+GNUPGHOME="$HOME/usr/keychain/gnupg"
+export GNUPGHOME
+
+KEYCHAIN_ROOT=CB4A4FBA
+export KEYCHAIN_ROOT
+
+### Pass Password store dir
+PASSWORD_STORE_DIR="$HOME/usr/keychain/password-store"
+export PASSWORD_STORE_DIR
+
+### Agda Directory
+AGDA_DIR="$HOME/config/Agda"
+export AGDA_DIR
+
+### Adding out bin to PATH
+PATH="$HOME/bin":$PATH
+export PATH
+
+##### CryFS Aliases
+alias crymount="cryfs --logfile $BASE/var/log/cryfs.log $BASE/safe $BASE/usr/priv"
+alias cryunmount="fusermount -u $BASE/usr/priv"

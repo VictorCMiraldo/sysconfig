@@ -1,0 +1,127 @@
+#! /bin/bash
+
+function print_usage() {
+  echo "usage: sysbckp <dst> <additional rsync opts>"
+  echo ""
+  echo "    <dst> is the absolute path of the"
+  echo "          destination"
+  exit 1
+}
+
+if [[ $# -lt 1 ]]; then
+  print_usage
+fi
+
+DST=$1
+
+case $SRC in
+  -h|--help)
+    print_usage
+  ;;
+esac
+
+RSYNC_OPTS="-rtpEh --progress --safe-links --exclude-from=$HOME/config/rsync/folder-backup.exc --include-from=$HOME/config/rsync/folder-backup.inc ${@:2}"
+
+echo "  SYSBCKP"
+echo "  ======="
+echo ""
+echo "Starting interactive system backup."
+
+if [ ! -e "$DST" ]; then
+  echo " !! Sorry, $DST does not exist"
+  exit 1
+fi
+
+echo "By default, the following folders will be"
+echo "copied to $DST."
+echo ""
+echo "    ~/bin"
+echo "    ~/config"
+echo "    ~/safe"
+echo "    ~/work"
+echo "    ~/usr/pub"
+echo ""
+read -p "Should I copy ~/usr/data (y/n) ? " ansUsrData
+read -p "Should I run keychain-priv-backup (y/n) ? " ansPriv
+
+CPYDATA=false
+CPYPRIV=false
+
+case $ansUsrData in
+  [Yy])
+    CPYDATA=true
+  ;;
+esac
+
+case $ansPriv in
+  [Yy])
+    CPYPRIV=true
+  ;;
+esac
+
+echo ""
+if $CPYDATA; then echo "I am copying your data."; fi
+if $CPYPRIV; then echo "I am copying your private data."; fi
+echo ""
+echo "running rsync with:"
+echo "  $RSYNC_OPTS"
+echo ""
+
+read -p "Last call... continue (y/n) ? " ans
+case $ans in
+  [Nn])
+    echo "  ok... :/"
+    exit 1
+  ;;
+esac
+
+LOGFILE=$(logfile-unique sysbckp)
+echo "SYSBCKP" > $LOGFILE
+echo "" >> $LOGFILE
+echo "CPYDATA=$CPYDATA; CPYPRIV=$CPYPRIV" >> $LOGFILE
+echo "" >> $LOGFILE
+echo "  $RSYNC_OPTS" >> $LOGFILE
+
+rsync $RSYNC_OPTS $HOME/bin $DST
+echo "bin: ok" >> $LOGFILE
+
+rsync $RSYNC_OPTS $HOME/config $DST
+echo "config: ok" >> $LOGFILE
+
+rsync $RSYNC_OPTS $HOME/safe $DST
+echo "safe: ok" >> $LOGFILE
+
+rsync $RSYNC_OPTS $HOME/work $DST
+echo "work: ok" >> $LOGFILE
+
+if $CPYPRIV && $CPYDATA; then
+
+  rsync $RSYNC_OPTS $HOME/usr $DST
+  echo "usr: ok" >> $LOGFILE
+
+else
+
+  rsync $RSYNC_OPTS $HOME/usr/pub $DST/usr
+  echo "usr/pub: ok" >> $LOGFILE
+
+  if $CPYPRIV; then
+
+    rsync $RSYNC_OPTS $HOME/usr/keychain $DST/usr
+    echo "usr/keychain: ok" >> $LOGFILE
+
+    rsync $RSYNC_OPTS $HOME/usr/priv $DST/usr
+    echo "usr/priv: ok" >> $LOGFILE
+
+  fi
+  if $CPYDATA; then
+
+    rsync $RSYNC_OPTS $HOME/usr/data $DST/usr
+    echo "usr/data: ok" >> $LOGFILE 
+
+  fi
+fi
+
+echo "Done!"
+echo "done" >> $LOGFILE 
+
+

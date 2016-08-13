@@ -1,0 +1,55 @@
+#! /bin/bash
+
+alias cabalupgrades="cabal list --installed  | egrep -iv '(synopsis|homepage|license)'"
+
+if [[ ! "$(cabal --version)" =~ "1.22" ]]; then
+  >&2 echo "!!! Required: cabal-install-1.22"
+  exit 0
+fi
+
+set -e
+
+echo "  Copying my config to ~/.cabal/config"
+if [ ! -e $HOME/.cabal ]; then mkdir $HOME/.cabal; fi
+cp $HOME/config/GHC/cabal-1.22-config $HOME/.cabal/config
+
+if [ ! -e $HOME/var/state/tools.haskell-libs ]; then
+  echo 'echo "broken" > $HOME/var/state/tools.haskell-libs' | sudo bash
+  echo "Ok, please re-run"
+else
+  if [ $HOME/.cabal/world -ot $HOME/config/GHC/InstallLibraries ]; then
+    echo "  WARNING: config/GHC/InstallLibraries:"
+    echo "    modifications since last install,"
+    echo ""
+    read -p "  Would you like to dump everything and start over (y/n) ? " ans0
+    case "$ans0" in
+      [Yy])
+        echo '      erasing directories under ~/.ghc'; rm -rf `find ~/.ghc -maxdepth 1 -type d`
+        echo '      erasing ~/.cabal/lib'; rm -rf ~/.cabal/lib
+        read -p "  I'm keeping the binaries. Ok? (Yes/No) " ans1
+        case "$ans1" in
+          No) 
+            echo "      erasing binaries under ~/.cabal/bin"
+            rm -rf ~/.cabal/bin/*
+          ;;
+        esac
+        MOD=false     
+      ;;
+      *)
+        echo "Ok, I'll run regardless."
+        MOD=true
+      ;;
+    esac
+  else
+    MOD=false
+  fi
+
+  if ! $MOD; then cabal update ; fi
+
+  cabal install cpphs-1.19
+  cabal install happy
+  cabal install alex
+
+  echo 'echo "1" > $HOME/var/state/tools.haskell-libs' | sudo bash
+fi
+

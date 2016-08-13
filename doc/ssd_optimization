@@ -1,0 +1,8 @@
+Here's a cool set of options
+to put in fstab for optimizing the life and speed of a ssd drive.
+
+noatime,nodiratime,discard,errors=remount-ro
+
+Now, putting tmp in a ramdisk is also useful!
+
+tmpfs /tmp tmpfs defaults,noatime,mode=1777 0 0

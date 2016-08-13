@@ -1,0 +1,17 @@
+#! /bin/bash
+
+if [[ "$#" -ne "1" ]]; then exit 1; fi
+if [ ! -e "$1" ]; then exit 1; fi
+
+echo "!! WARNING !!"
+echo "   Will copy in PLAINTEXT"
+echo "Backing up ~/usr/keychain and ~/usr/priv to $1"
+echo ""
+read -p "  continue? (type yes) " ans
+case "$ans" in
+  [Yy]es)
+    echo "keychain_priv_backup" >> "$(logfile_monthly keychain_priv_backup)"
+    folder-mirror usr/keychain $1 --log-file=$(logfile-monthly keychain_priv_backup)
+    folder-mirror usr/priv $1 --log-file=$(logfile-monthly keychain_priv_backup)
+  ;;
+esac

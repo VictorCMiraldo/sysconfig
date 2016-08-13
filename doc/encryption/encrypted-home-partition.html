@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>the_simple_computer</title>
+  <meta name="description" content="A Resource for Infosocial Awareness">
+
+  <link href="encrypted-home-partition_files/default.css" rel="stylesheet" type="text/css">
+  <link href="https://thesimplecomputer.info/favicon.ico" rel="shortcut icon">
+  <link href="https://thesimplecomputer.info/feed.xml" rel="alternate" type="application/rss+xml" title="the_simple_computer">
+</head>
+
+<body>
+  <header>								<!-- Header -->
+    <div id="sidebar_button">
+    <div id="hburger">
+     <span class="bar"></span>
+     <span class="bar"></span>
+     <span class="bar"></span>
+    </div>
+      <p id="hburger_txt">Menu</p>
+    </div>
+
+  <nav id="sidebar">
+    <a href="https://thesimplecomputer.info/index.html">Home</a>
+    <a href="https://thesimplecomputer.info/baselines">Baselines</a>
+    <a class="tops" tabindex="0">Top Articles</a>
+      <ul class="tops_menu">
+       <li><a href="https://thesimplecomputer.info/free-webmail-for-better-privacy">Free Webmail for Better Privacy</a></li>
+       <li><a href="https://thesimplecomputer.info/full-disk-encryption-with-ubuntu">Guide to Full Disk Encryption with Ubuntu</a></li>
+       <li><a href="https://thesimplecomputer.info/choosing-a-linux-music-player">Choosing a Linux Music Player</a></li>
+       <li><a href="https://thesimplecomputer.info/1-month-with-the-midori-web-browser">1 Month with the Midori Web Browser</a></li>
+       <li><a href="https://thesimplecomputer.info/a-list-of-dns-service-providers">A List of DNS Service Providers</a></li>
+      </ul>
+    <a href="https://thesimplecomputer.info/pages/about">About</a>
+  </nav>
+
+  <form id="searchform" class="icon-search" action="pages/results.html">
+    <input name="q" id="tipue_search_input" placeholder="Search" autocomplete="off" required="" type="text">
+  </form>
+
+  </header>								<!-- Header END -->
+
+	<div id="title">
+	  <p id="t_big">the_simple_computer</p>
+	  <p id="t_sm">A Resource for Infosocial Awareness</p>
+	</div>
+
+  <article>								<!-- Article -->
+	<h1>Encrypt Your Linux Home Folder: 2 Ways and 10 Steps</h1>
+	<p style="text-align:center;">Updated August 22, 2014.</p><p>
+
+</p><p>Here’s a quick &amp; dirty guide to encrypting your Linux 
+system's home and swap partitions. Currently two of the most popular 
+ways to do this are with eCryptfs and then dm_crypt using Cryptsetup and
+ LUKS. TrueCrypt was another generally trusted choice but has succumbed 
+to, well, <a href="http://truecrypt.sourceforge.net/" target="_blank">Bitlocker</a>(!?). TrueCrypt has several forks and there is also <a href="https://www.dyne.org/software/tomb/" target="_blank">Tomb</a>. Tomb can't encrypt full hard drives or partitions but it can be used to create encrypted volumes within an operating system.</p>
+
+<p>eCryptfs, dm_crypt and LUKS have been present in the Linux kernel 
+since 2.6. They are packaged in most distros' repositories and are the 
+backend to encrypting during manual partition setup through Parted or 
+GParted. eCryptfs is filesystem encryption and encrypting with dm_crypt,
+ LUKS and Cryptsetup is block-level encryption. What does that mean? 
+Let’s compare and contrast the two methods. If you found this page but 
+were really looking for full disk encryption, then <a href="https://thesimplecomputer.info/full-disk-encryption-with-ubuntu" target="_blank">see here</a></p>
+
+	<div class="gradient"></div>
+
+	<h2>What is eCryptfs?</h2>
+<p>eCryptfs is one of several implementations of filesystem encryption, 
+similar to EncFS. It originated in part from IBM in 2009, it’s default 
+enabled in Google’s Chrome OS and eCryptfs is what Ubuntu’s desktop 
+installer uses when you choose to encrypt your home directory when 
+entering your username and password during installation. As Canonical 
+developer and eCryptfs package maintainer Dustin Kirkland says in <a href="https://slo-tech.com/clanki/10008en/" target="_blank">this interview</a>, <i>“The real goal of eCryptfs is to protect your data if your computer or hard disk is stolen.”</i></p>
+
+<p>When installing Ubuntu or its derivatives, you check the box to 
+encrypt /home and that’s literally all you need to do. 
+ecryptfs-setup-private is the configuration script used which gives you 
+AES in XTS-plain with a 128 bit key size and SHA256 password hashing. If
+ you have a swap area, the installer even encrypts that too with 
+dm_crypt.</p>
+
+<p>If your distro of choice doesn't have an option like this, there is 
+manual setup which is more tedious but lets you customize the 
+configuration. If you want eCryptfs but have already installed your 
+distro, there are guides to walk you through migrating to an eCryptfs 
+encrypted home. Here are two: <a href="https://wiki.archlinux.org/index.php/System_Encryption_with_eCryptfs#Setup_.28in_detail.29" target="_blank">[1]</a> <a href="https://sites.google.com/site/installationubuntu/security/encrypt-your-home-folder" target="_blank">[2]</a></p>
+
+<h3>Benefits of eCryptfs</h3>
+	<ul>
+<li>With the default script and installer, a PAM module automatically decrypts the filesystem when you log in to your account.</li>
+<li>On computers with multiple user accounts, when one user logs in, the other users’ data remains encrypted.</li>
+<li>Multiple user accounts can share encrypted files.</li>
+<li>Supports authentication with multiple keys (both files and passwords) from multiple sources.</li>
+<li>Supports AES-NI.</li>
+<li>Encryption happens in the kernel, not in userspace like with EncFS, and does not require FUSE.</li>
+<li>Supports AES, Twofish, Blowfish, Triple DES and Cast 5 &amp; 6.</li>
+<li>Does not require its own block space or partition.</li>
+<li>No need to change anything for your incremental file backups.</li>
+<li>Can be used to encrypt the contents of cloud storage accounts, independent of the specific service provider.</li>
+<li>So easy to do on a new installation, even total noobs have little excuse not to use it.</li>
+	</ul>
+
+
+<h3>Disadvantages of eCryptfs</h3>
+	<ul>
+<li>Filesystem encryption leaks information. An attacker can mount /home
+ and view the filesystem’s hierarchy and the size, permissions and date 
+modified of all encrypted files.</li>
+<li>The ecryptfs-setup-private script (and thus, Ubuntu’s installer) 
+does not encrypt file names. It can be done, but you must do a manual 
+configuration of eCryptfs.</li>
+<li>eCryptf is only a single-threaded process so the CPU isn't fully taken advantage of.</li>
+<li>Can be tricky to get working with non-standard (NTFS, FAT, ext) filesystems.</li>
+<li>Filesystem encryption can not be obscured in a sea of random data like block level encryption can.</li>
+<li>Filesystem encryption stores the decryption key within the filesystem itself, though encrypted.</li>
+	</ul>
+
+<p>I’d say Dustin Kirkland’s outlook on eCryptfs is quite realistic. I 
+don't see why file names are not encrypted from the start, but I find no
+ fault in giving people ultra simple data encryption as eCryptfs does, 
+even if the threat model is primarily computer thieves, presumably with 
+no crypto or forensics knowledge and/or need for such information. 
+However, outside that area of general protection, eCryptfs would not be 
+appropriate.</p>
+<br>
+ 
+
+	<h2>What is dm_crypt/Cryptsetup/LUKS?</h2>
+<p>They’re <a href="https://code.google.com/p/Cryptsetup/wiki/FrequentlyAskedQuestions#1._General_Questions" target="_blank">three different things</a>
+ which are used for block-level and device encryption in Unix systems. 
+dm_crypt is the backend kernel module while LUKS and Cryptsetup are 
+controllers to create and manipulate your volumes and key files. The 
+combination of the three is often just referred to as 'encrypting with 
+LUKS'.</p>
+
+<p>LUKS encryption is built into desktop and alternate installers to 
+various degrees. Often LUKS encryption is paired with LVM setup which 
+can be unnecessary if you have no use for logical volume management or 
+more than 4 primary partitions. The default Cryptsetup settings use LUKS
+ and give you AES_256 in XTS-plain64 mode and SHA1 password hashing.</p>
+
+<h3>Benefits</h3>
+	<ul>
+<li>Block-level encryption does not leak information about your 
+filesystem. If you mount a LUKS device when it’s closed, you can only 
+see a blob of unintelligible data.</li>
+<li>Block-level and device encryption have less of an impact on performance than filesystem encryption.</li>
+<li>Supports AES-NI and encryption happens in the kernel.</li>
+<li>Supports authentication with up to 8 keys (both files and passwords) from different sources.</li>
+<li>Supports many different ciphers, modes and key specifications, including all AES finalists.</li>
+<li>Can encrypt the system, home and swap partitions individually.</li>
+<li>Compatible with Truecrypt containers.</li>
+<li>Also so easy to do on a new installation, there's little reason not to for mobile devices.</li>
+	</ul>
+
+<h3>Disadvantages</h3>
+	<ul>
+<li>More difficult to manually set up than filesystem encryption.</li>
+<li>Default settings (Cryptsetup + LUKS) use SHA1 for key hashing which 
+cannot be changed from within the installer, be they desktop or 
+alternate. There's consolation in the fact that key generation uses 
+PBKDF2 (tens to hundreds of thousands of iterations). Still, it's 
+becoming time to <a href="http://arstechnica.com/security/2012/12/oh-great-new-attack-makes-some-password-cracking-faster-easier-than-ever/" target="_blank">move on</a> to SHA3.</li>
+<li>The decryption key or passphrase is needed to fully boot the 
+computer. For multiple user accounts, everyone’s data is decrypted on 
+login and all users must have the decryption key(s).</li>
+<li>dm_crypt is single-threaded.</li>
+<li>A LUKS header includes the volume header and all key slots. If a 
+header or a key slot becomes damaged, all data on the device will be 
+irrecoverable. It is vital that you create backups of your LUKS header 
+(and don’t store it on the same encrypted partition).</li>
+<li>If you encrypt your whole system in separate partitions (for 
+example: /, /home and swap), you will have at least two decryption keys 
+to enter on boot and when resuming from hibernation: one for / and one 
+for swap. That's not including your user password once you get past the 
+encryption, but it does assume that you either automatically decrypt 
+home with a key file, or are on a distro using systemd.</li>
+	</ul>
+
+<p>The biggest arguments for block level encryption are the performance 
+advantage and the lack of any indication of what may be inside the 
+encrypted volume. Also, I am of the religion that you should have 
+separate root and home partitions on non-server systems. This gives you 
+more flexibility with fstab and if your system partition breaks or 
+becomes too cluttered, you can reimage it and not worry about loosing 
+personal data.</p>
+<br>
+
+
+	<h2>The Main Event</h2>
+<p>Alas, here is the point of this page: step-by-step instructions for 
+encrypting your /home and swap partitions with dm_crypt, Cryptsetup and 
+LUKS&amp;—but in a manner unconfined to Cryptsetup's default settings. 
+Included as well are more mundane benefits like intuitive volume naming 
+(ex. <i>home</i> instead of <i>sda2_crypt</i>), not to mention that you can do this on existing systems without reinstalling anything or even needing a live session.</p>
+
+<p>The only prerequisite is that since dm_crypt is block or device 
+encryption, /, /home and swap must all be separate partitions. If you 
+use swap with an encrypted home, the swap partition or file must somehow
+ be encrypted too or everything moved into it will be plaintext, easily 
+recoverable until those drive sectors are overwritten enough times, 
+which could take a very long time to happen.</p>
+
+<p>These directions will give you hibernation as well. If you don't use 
+swap or hibernate, ignore where they're mentioned. If you do want a swap
+ area but don't use hibernation, skip where a swap partition is 
+mentioned in the numbered instructions. You can instead use a swap file 
+created after your encrypted /home partition is all set up. For this, 
+see the More Swap area at the bottom of the page.</p>
+
+<p>Last but not least: <span style="color:#ff0000; font-size: 120%; text-align:center;">This
+ process will completely destroy all data on the designated drives or 
+partitions. Back up your personal and config files before going further.</span></p>
+<br>
+
+	<h2>Step 1 - Install Cryptsetup</h2>
+<p>First thing to do is make sure you have Cryptsetup on the system. If 
+you do need it, install while in your normal user account instead of 
+later in the root shell so you're not exposing it to the internet.</p><br>
+
+	<pre><code>
+sudo apt-get install cryptsetup
+	</code></pre>
+<br>
+
+
+	<h2 id="noisefill">Step 2 - Prepare Noise Fill</h2>
+<p>You ideally want to fill the hard drive with nonsense data so that 
+your encrypted block devices are indistinguishable from free space. If 
+you're starting with a blank drive, do the whole thing, even if you plan
+ to install other operating systems. If you want to preserve other 
+systems already installed, then only fill the partitions you plan to 
+encrypt.</p>
+
+<p>You have two options to do this. Sourcing /dev/urandom is commonly 
+suggested for filling and gives you a background of random data. The 
+downside is that it is extremely slow, writing in the area of 10-20 MB 
+per second even on platter drives with 4K sectors. That can work out to a
+ day or more for the operation to complete on a single drive.</p>
+
+<p>Another point is that random data and encrypted data are not the same
+ and in this scenario, sourcing such high quality entropy (well, as 
+quality as a default system can get) is very unnecessary. You're not 
+generating encryption keys with this, you're only masking where 
+encrypted data is on the hard drive.</p>
+
+<p>The second and less common option uses /dev/urandom, /dev/zero and 
+OpenSSL to fill with an AES encrypted data stream at your drive's normal
+ write speed. This can still take a while for large drives, but is 
+naturally a fraction of what's needed for urandom. This method is 
+especially appropriate if you choose AES for your encrypted partitions 
+because then you're hiding AES ciphertext in, wait for it...AES 
+ciphertext!</p>
+
+<p>There are no security implications with one method over the other 
+because filler data has no impact on the encrypted partitions' integrity
+ or the encrypted data inside. OpenSSL can't do other block ciphers in 
+counter mode though, so AES it is, but this isn't a concern because, 
+again to drive the point home, you're only writing noise to the storage 
+device.</p>
+
+<p>The command below creates a 128 byte encryption key seeded from 
+urandom. /dev/zero is used to fill the drive but AES-256 in CTR mode is 
+used to encrypt /dev/zero's output with the urandom key before anything 
+is written to disk. The result is a device filled with AES ciphertext. 
+You'll want a root terminal for this or use <span class="icode">sudo -i</span>.</p><br>
+
+	<pre><code>
+openssl enc -aes-256-ctr -pass pass:"$(dd if=/dev/urandom bs=128 count=1 2&gt;/dev/null | base64)" -nosalt &lt; /dev/zero &gt; /dev/sd<span class="red">xy</span>
+	</code></pre>
+<br>
+
+<p>If you specifically want to fill with urandom, it's your choice. 
+Here's that familiar dd command. If you're worried about urandom 
+eventually depleting and then looping its entropy pool, <a href="http://www.2uo.de/myths-about-urandom/" target="_blank">don't be</a>.</p><br>
+
+	<pre><code>
+sudo dd if=/dev/urandom of=/dev/sd<span style="red">xy</span> bs=4096
+	</code></pre>
+<br>
+
+<p>To fill, you can either attach the drive to an already installed 
+system by USB/SATA/etc. and work from there, or boot into a live 
+session. For either method, you'll know it's nearly completed when it 
+warns 'no space left on device'.</p>
+<br>
+
+
+	<h2>Step 3 - Recovery Mode</h2>
+<p>When all is finished with drive filling, boot into recovery mode or if you have the root account enabled, boot into that. <a href="http://askubuntu.com/questions/92556/how-do-i-boot-into-a-root-shell" target="_blank">Here</a>
+ are instructions for how to do it. In recovery mode, notice you only 
+have read access to the filesystem. You need write access too so remount
+ the system partition.</p><br>
+
+	<pre><code>
+mount -o remount,rw /
+	</code></pre>
+<br>
+
+<p>Now you should be here (the "state: read-only" part won't change):</p>
+
+	<img src="encrypted-home-partition_files/remountrw.html" alt="">
+<br>
+<br>
+
+
+	<h2>Step 4 - Cryptsetup</h2>
+<p>Create the new encrypted partitions. The command below gives you an 
+equivalent to the eCryptfs default crypto strength, the only difference 
+is that I changed the XTS mode to plain64 from plain which allows for 
+volumes greater than 2TB. Notice the key size says 256, this is because 
+of how XTS mode works. Half of the key space is for the key itself and 
+the other half used by the cipher mode so this results in a 128 bit key.
+ If you want a 256 bit key in XTS mode with any cipher, you would set 
+the key size to 512. Other cipher modes don't need this exception.</p>
+
+<p>Remember, this is just one of many possible combinations. For the 
+minimal threat model of keeping info safe from ordinary theft, it’s a 
+solid choice. Since we have /home and swap to encrypt, run the 
+luksFormat command on each partition.</p><br>
+
+	<pre><code>
+cryptsetup luksFormat --cipher aes-xts-plain64 --key-size 256 --hash sha256 /dev/sd<span class="red">xy</span>
+	</code></pre>
+<br>
+
+<p>Now that you have encrypted home and swap volumes, open and name them home and swap (or whatever you want).</p>
+<br>
+
+	<pre><code>
+cryptsetup luksOpen /dev/sd<span class="red">xy</span> home
+
+cryptsetup luksOpen /dev/sd<span class="red">xy</span> swap
+	</code></pre>
+<br>
+
+
+<p>Make an ext 4 filesystem inside and a swap area.</p><br>
+
+	<pre><code>
+mkfs.ext4 /dev/mapper/home
+
+mkswap /dev/mapper/swap
+	</code></pre>
+<br>
+<br>
+
+
+	<h2>Step 5 - fstab</h2>
+<p>fstab tells the system which partitions to automatically mount on 
+boot and with what filsystem attributes. Since we now have totally new 
+identifiers for our encrypted partitions, we must update fstab with 
+them.</p><br>
+
+	<pre><code>
+nano /etc/fstab
+	</code></pre>
+<br>
+
+<p>Replace the UUIDs with /dev/mapper/home and /dev/mapper/swap. When finished, it should look similar to this:</p>
+
+	<img src="encrypted-home-partition_files/fstab.html" alt="">
+<br>
+
+<p>Then press <strong>Control+X</strong> to exit nano, <strong>Y</strong> to confirm and <strong>Enter</strong> to save the changes.</p>
+<br>
+ 
+
+	<h2>Step 6 - crypttab</h2>
+<p>The crypttab file tells the system which are your encrypted volumes. 
+Since we created these volumes after the system was already installed, 
+there won't be a crypttab file. We'll need to create it but first we 
+need the encrypted partitions' block identifiers because we don't want 
+to use device names here like /dev/sda2.</p><br>
+
+	<pre><code>
+blkid
+	</code></pre>
+<br>
+<p>The UUIDs you want will say crypto_luks at the end. Put them into crypttab.</p><br>
+
+	<pre><code>
+nano /etc/crypttab
+	</code></pre>
+<br>
+
+<p>When finished, your crypttab file should look something like below. 
+Change the end of a partition's entry to "luks,discard" if it's on an 
+SSD and make sure swap's crypttab entry says "swap" at the end. This 
+swap option means the mkswap command is run on each boot after the 
+volume is opened so there's no chance of anything in swap surviving a 
+reboot. Press <strong>Control+X</strong> to exit nano, <strong>Y</strong> to confirm and then <strong>Enter</strong> to save.</p>
+
+	<img src="encrypted-home-partition_files/crypttab.html" alt="">
+<br>
+<br>
+
+
+	<h2>Step 7 - Mark Your Territory</h2>
+<p>Mount your new /home.</p><br>
+
+	<pre><code>
+mount /dev/mapper/home
+	</code></pre>
+<br>
+<p>If you run <span class="icode">ls /home</span>, you’ll see only 
+lost+found inside. You must make a new home folder for your user 
+account. Documents, Music, etc. will be magically recreated on its own 
+thanks to the package <i>xdg-user-dirs</i>, which desktop installations come with.</p><br>
+
+	<pre><code>
+mkdir /home/<span class="red">your_username</span>
+	</code></pre>
+<br>
+
+<p>Finally, take ownership and set file and folder permissions.</p><br>
+
+	<pre><code>
+chown -R <span class="red">your_username</span> /home/<span class="red">your_username</span>
+	</code></pre>
+<br>
+	<pre><code>
+chmod 750 /home/<span class="red">your_username</span>
+	</code></pre>
+<br>
+<br>
+ 
+
+	<h2>Step 8 - Fix Hibernation</h2>
+<p>We now want to set the resume target for coming out of hibernation. Take a look at:</p><br>
+
+	<pre><code>
+nano /etc/initramfs-tools/conf.d/resume
+	</code></pre>
+<br>
+<p>If you see "RESUME=UUID=<i>somelongdeviceidentifier</i>", that's the 
+UUID of your old unencrypted swap device. You don't want that. You want 
+to resume from your encrypted swap so change it to:</p><br>
+
+	<pre><code>
+RESUME=/dev/mapper/swap
+	</code></pre>
+<br>
+
+<p>Now to finish everything off, generate a new boot filesystem image.</p><br>
+
+	<pre><code>
+update-initramfs -u
+	</code></pre>
+<br>
+<br>
+
+
+	<h2>Step 9 - Verify</h2>
+<p>Check the LUKS header to see if everything is okay.</p><br>
+
+	<pre><code>
+cryptsetup luksDump /dev/sd<span class="red">xy</span>
+	</code></pre>
+<br>
+<p>Here is what the header contents look like. You can see the cipher, 
+hashing with the number of PBKDF2 iterations and the used key slot. 
+Looks good.</p>
+
+	<img src="encrypted-home-partition_files/luksdump.html" alt="">
+<br>
+<br>
+
+	<h2>Step 10 - LUKS Header Backup</h2>
+<p>Now back up /home's LUKS header. <span class="red">Do not skip this!</span>
+ The command below puts the header image on your Desktop, it will be 
+owned by root. Leave it that way and move it to external storage.</p><br>
+
+	<pre><code>
+Cryptsetup luksHeaderBackup /dev/sd<span class="red">xy</span> --header-backup-file /home/<span class="red">your_username</span>/Desktop/FILENAME.img
+	</code></pre>
+<br>
+
+<p>That’s it! Type <i>reboot</i>, press Enter and then have a cookie. 
+You deserve it. If all went well, you will be asked for the partitions' 
+decryption passwords (you won’t have a cropped screen, that’s because of
+ Virtualbox):</p>
+
+	<img src="encrypted-home-partition_files/unlockdrive.html" alt="">
+<br>
+
+	<div class="gradient"></div>
+
+
+	<h2>Extra Tips</h2>
+<h3>General Troubleshooting</h3>
+<p>If all did not go well, you’ll have the choice to skip mounting or 
+enter manual recovery. If an encrypted volume won't mount on boot, it's 
+probably the wrong UUID in crypttab or something wrong in fstab. Just go
+ back into recovery mode, check the blkid again and that crypttab and 
+fstab are as they should be. Worst case scenario: you must start over 
+from Step 3, though this shouldn't happen.</p>
+
+<h3>Hibernation Troubleshooting</h3>
+<p>The general rule for hibernation is that if it works on an 
+unencrypted system, it will work on an encrypted system too, even though
+ the software can be uncooperative at times. Changing the RESUME= line 
+as you did in Step 8 should be all that's necessary but if you get stuck
+ on this, here are some other guides which may prove useful:</p>
+
+        <ul>
+<li>Ubuntu Community Wiki: <a href="https://help.ubuntu.com/community/EnableHibernateWithEncryptedSwap" target="_blank">Enable Hibernate With Encrypted Swap</a> and <a href="http://ubuntuforums.org/showthread.php?t=2012408&amp;s=a0515f1a752a2d98f3c0f296b5a75221" target="_blank">its discussion thread</a> on Ubuntuforums.</li>
+<li>Ubuntu Community Wiki: <a href="https://help.ubuntu.com/community/PowerManagement/Hibernate" target="_blank">Power Management/Hibernate</a></li>
+<li>Arch Linux Wiki: <a href="https://wiki.archlinux.org/index.php/Suspend_and_Hibernate" target="_blank">Suspend and Hibernate</a></li>
+<li>Feeding the Cloud, <a href="http://feeding.cloud.geek.nz/posts/encrypted-swap-partition-on/" target="_blank">Encrypted swap partition on Debian/Ubuntu</a>.</li>
+        </ul>
+
+<h3>Upgrading &amp; Changing Distros</h3>
+<p>If you want to keep your snazzy new partitions but reinstall to a 
+newer release or move to a new distro, here’s what to do. Again, <span class="red">back up your data in case something goes wrong!!</span></p>
+
+	<ol>
+<li>You’re in the live session, you’re about to install. Mount and 
+decrypt home and swap. When you click Install Now, if asked if you want 
+to unmount, choose No.</li>
+<li>Two or 3 menus in, you'll have the choice to install the new distro 
+along side the old, in place of the old, or Something Else. Choose 
+Something Else.</li>
+<li>Now at the partitioning table, mark / and swap for installation and 
+the filesystem type as ext 4 or whatever your choice. Mark / for 
+formatting. Set the /dev/mapper/luks entry to mount as /home but <span class="red">do NOT format!</span>
+ Make sure /home is not checked to be formatted, then check again; all 
+you need to do is mark the mapper device as /home’s mount point and ext 
+4. If you format, it will destroy the encrypted partition and everything
+ inside.</li>
+<li>With the system installed, go into recovery mode again and mount / as rw like in Step 3 further above.</li>
+<li>Open fstab and change /dev/mapper/luks to /dev/mapper/home (or 
+whatever you named it to). Don't forget swap. Then make sure crypttab is
+ set up properly and reboot.</li>
+	</ol>
+<br>
+
+	<h2>More Swap</h2>
+<p>If you do want a swap area but don't use hibernate you can use a swap
+ file. You can do this from in your normal user session and you want the
+ file located at /home/swapfile because <u>you want the swap file located on an encrypted partition</u>.
+ Without hibernate, you'll be suspending to RAM. That's fine, but know 
+that your LUKS key is stored in RAM unencrypted when the computer is 
+sleeping.</p>
+
+<p>First make a swap container. N is the size you want in gigabytes and a
+ minimum swap size of half your system's RAM is realistically 
+sufficient.</p><br>
+
+	<pre><code>
+sudo fallocate -l <span class="red">N</span>G /home/swapfile
+	</code></pre>
+<br>
+
+<p>Then make the actual swap filesystem and restrict its permissions to root only.</p><br>
+	<pre><code>
+sudo mkswap /home/swapfile
+
+sudo chmod 0600 /home/swapfile
+	</code></pre>
+<br>
+
+<p>Add it to fstab.</p><br>
+	<pre><code>
+/home/swapfile  none  swap  sw  0 0
+	</code></pre>
+<br>
+
+<p>And last, switch it on. No reboot necessary.</p><br>
+	<pre><code>
+sudo swapon /home/swapfile
+	</code></pre>
+<br>
+
+<h3>A False Move</h3>
+<p>Some guides mention adding encryption options to crypttab for swap, 
+similar to what's below. The intention is to re-encrypt swap's partition
+ on each boot with a key seeded by urandom. However, to quote the 
+crypttab manual (<span class="icode">man crypttab</span>), these options are, "<i>... ignored for LUKS devices.</i>" Also see where it says LUKS needs a persistent key. The point is: <u>don't add these options unless you're using plain dm_crypt</u>.</p><br>
+	<pre><code>
+   <span class="red">No!</span>
+swap	UUID=....	<u>/dev/urandom</u>	<u>cipher=aes-xts-plain64:whirlpool</u>
+   <span class="red">No!</span>
+	</code></pre>
+<br>
+
+<h3>Swap Location and Performance</h3>
+<p>See the Arch Linux Wiki's <a href="https://wiki.archlinux.org/index.php/HOW_TO:_Create_swap_file" target="_blank">Swap page</a>.</p>
+
+
+	<div id="shareme">
+	    <p>Share this page.</p>
+
+	<div id="share-buttons">
+	    <a class="image" href="https://www.facebook.com/sharer/sharer.php?u=http://thesimplecomputer.info/encrypt-your-linux-home-folder-2-ways-and-10-steps&amp;text=the_simple_computer%20-%20Encrypt%20Your%20Linux%20Home%20Folder:%202%20Ways%20and%2010%20Steps" target="_blank" title="Share on Facebook"><img src="encrypted-home-partition_files/facebook.html" alt=""></a>
+
+	    <a class="image" href="https://plus.google.com/share?url=http://thesimplecomputer.info/encrypt-your-linux-home-folder-2-ways-and-10-steps" target="_blank" title="Share on Google+"><img src="encrypted-home-partition_files/google.html" alt=""></a>
+
+	    <a class="image" href="https://twitter.com/intent/tweet?url=http://thesimplecomputer.info/encrypt-your-linux-home-folder-2-ways-and-10-steps&amp;text=the_simple_computer%20-%20Encrypt%20Your%20Linux%20Home%20Folder:%202%20Ways%20and%2010%20Steps" target="_blank" title="Tweet this page"><img src="encrypted-home-partition_files/twitter.html" alt=""></a>
+
+	    <a class="image" href="https://vkontakte.com/share.php?url=http://thesimplecomputer.info/encrypt-your-linux-home-folder-2-ways-and-10-steps" target="_blank" title="Share on ВК"><img src="encrypted-home-partition_files/vkontakte.html" alt=""></a>
+
+	    <a class="image" href="mailto:?subject=Encrypt%20Your%20Linux%20Home%20Folder:%202%20Ways%20and%2010%20Steps&amp;body=:http://thesimplecomputer.info/encrypt-your-linux-home-folder-2-ways-and-10-steps" target="_blank" title="Send by email"><img src="encrypted-home-partition_files/email.html" alt=""></a>
+	</div></div>
+
+
+      </article>							<!-- end article -->
+  <footer></footer>
+
+<a href="#" class="scrollup icon-angle-up" title="Back to Top"></a>
+
+ <script src="encrypted-home-partition_files/jquery.js" type="text/javascript"></script>
+ <script src="encrypted-home-partition_files/scrollup.js" type="text/javascript"></script>
+
+
+
+</body></html>

@@ -1,0 +1,7 @@
+#! /bin/bash
+
+## Reads lines of a file ignoring comments.
+if [[ "$#" -ne "1" ]]; then exit 1; fi
+if [ ! -e "$1" ]; then exit 1; fi
+
+cat $1 | sed "s/#.*$//" | grep -v "^$"

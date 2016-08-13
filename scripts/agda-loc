@@ -1,0 +1,3 @@
+#! /bin/bash
+
+find . \( -name "*.lagda" -or -name "*.agda" \) -exec wc -l {} \; | cut -d " " -f 1 | paste -s | sed "s/\t/+/g" | bc

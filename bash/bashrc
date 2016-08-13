@@ -1,0 +1,17 @@
+#! /bin/bash
+
+LATEXLIB=$HOME/lib/latex
+
+PATH=$PATH:$HOME/config/scripts:$HOME/.cabal/bin:/opt/cabal/1.24/bin
+export PATH
+
+# Adding some colors is a cool idea
+PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+# And fixing up my hostname at the window title
+PROMPT_COMMAND='echo -ne "\033]0;"Bash $(whoami)@$(hostname)"\007"'
+
+JBLFLIP2="0C:A6:94:7B:8C:BB"
+  
+
+# Cool weather forecast in the terminal
+alias weather='curl -4 http://wttr.in/Utrecht'

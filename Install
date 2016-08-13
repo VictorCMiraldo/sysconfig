@@ -1,0 +1,148 @@
+#! /bin/bash
+
+# Runs "installation" procedure for the configuration scripts.
+
+# If any command here fails, installation is dropped.
+set -e
+
+# Drop credentials
+sudo -k
+
+# And ask for them again
+echo "I need to make sure I can sudo"
+sudo echo "  Great!"
+
+## Let's make sure we have everything we need.
+
+##
+## Software Sources
+##
+
+# Spotify
+if [ ! -e /etc/apt/sources.list.d/spotify.list ]; then
+  sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys BBEBDCB318AD50EC6865090613B00F1FD2C19886
+  echo "deb http://repository.spotify.com stable non-free" | sudo tee /etc/apt/sources.list.d/spotify.list
+fi
+
+# Ghc
+if [[ -z `ls /etc/apt/sources.list.d | grep hvr` ]]; then
+  sudo add-apt-repository -y ppa:hvr/ghc
+fi
+
+# OwnCloud
+if [ ! -e /etc/apt/sources.list.d/owncloud-client.list ]; then
+  wget http://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_15.10/Release.key
+  sudo apt-key add - < Release.key
+  rm Release.key
+  echo 'deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_15.10/ /' | sudo tee /etc/apt/sources.list.d/owncloud-client.list
+fi
+
+read -p "Should we update apt (yes/no) ? " ans
+case "$ans" in
+  [Yy]es)
+    sudo apt-get -qq update
+  ;;
+esac
+
+echo "INSTALLING"
+
+##
+## WARNING! running this thing twice might cause problems!
+##          pay attention!
+##
+
+#################################
+#################################
+##                             ##
+##        BASIC INSTALL        ##
+##                             ##
+#################################
+#################################
+
+##
+## Calls our bash profile and bashrc in the system's
+## bashrs and profile scripts.
+##
+echo "-- Bash:"
+if [ ! -s $HOME/var/state/cfg.bash ]; then
+  echo "    Please, re-run the installation."
+  echo "    I need my .bashrc"
+
+  echo -e "if [ -e \"\$HOME/config/bash/bashrc\" ]; then
+    . \$HOME/config/bash/bashrc
+  fi\n" >> $HOME/.bashrc
+
+  echo -e "if [ -e \"\$HOME/config/bash/profile\" ]; then
+    . \$HOME/config/bash/profile
+  fi\n" >> $HOME/.profile
+  
+  echo 'echo "1" > $HOME/var/state/cfg.bash' | sudo bash
+  
+  echo "    installed"
+  exit 0
+else
+  echo "    skipping"
+fi
+
+## Install the packages we want to have everywhere.
+$HOME/config/stdPackages/Install
+
+##
+## Copies our xdg user directories to the right place,
+## making the system aware of that.
+##
+echo "-- XDG user dirs:"
+if [ ! -s $HOME/var/state/cfg.xdg.user-dirs ]; then
+  cp xdg/user-dirs.dirs $HOME/.config/user-dirs.dirs
+    
+  echo 'echo "1" > $HOME/var/state/cfg.xdg.user-dirs' | sudo bash
+    
+  echo "    installed"
+else
+  echo "    skipping"
+fi 
+
+##
+## Runs the UFW configuration script.
+##
+echo "-- UFW config:"
+if [ ! -s $HOME/var/state/cfg.ufw ]; then
+  sudo firewall/ufw
+  
+  echo 'echo "1" > $HOME/var/state/cfg.ufw' | sudo bash
+  
+  echo "    installed"
+else
+  echo "    skipping"
+fi
+
+#################################
+#################################
+##                             ##
+##     OPTIONAL COMPONENTS     ##
+##                             ##
+#################################
+#################################
+
+function readInstall() {
+  if [ ! -e $HOME/config/$1 ]; 
+  then
+    echo "!! ./$1/Install does not exist!"
+    exit 1
+  fi
+
+  read -p "  |- install $1 (y/n) ?" ans
+  case "$ans" in
+    [Yy]) 
+      bash $HOME/config/$1/Install
+    ;;
+    *)
+      echo "        skipping."
+    ;;
+  esac
+}
+
+readInstall "latex"
+readInstall "GHC"
+readInstall "Agda"
+readInstall "ownCloud"

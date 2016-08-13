@@ -1,0 +1,43 @@
+## Kernel Modules
+hddtemp
+lm-sensors
+cryptsetup
+
+## Libraries
+zlib1g-dev 
+libncurses5-dev
+software-properties-common
+
+## Binaries
+rsync
+tree
+pass
+gedit
+curl
+meld
+htop
+xdotool
+
+## Complements
+gedit-developer-plugins 
+gedit-plugins
+
+## Programming
+#cabal-install-1.22
+#ghc-7.10.3
+#ghc-7.10.3-prof
+cabal-install-1.24
+ghc-8.0.1
+ghc-8.0.1-prof
+emacs24
+vim
+
+## LaTeX (handled by it's own script)
+## And cousins
+lhs2tex
+pandoc
+
+## General Purpose
+spotify-client
+owncloud-client
+imagemagick

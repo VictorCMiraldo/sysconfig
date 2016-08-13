@@ -1,0 +1,267 @@
+Encrypt Your Linux Home Folder: 2 Ways and 10 Steps
+
+Updated August 22, 2014.
+
+Here’s a quick & dirty guide to encrypting your Linux system's home and swap partitions. Currently two of the most popular ways to do this are with eCryptfs and then dm_crypt using Cryptsetup and LUKS. TrueCrypt was another generally trusted choice but has succumbed to, well, Bitlocker(!?). TrueCrypt has several forks and there is also Tomb. Tomb can't encrypt full hard drives or partitions but it can be used to create encrypted volumes within an operating system.
+
+eCryptfs, dm_crypt and LUKS have been present in the Linux kernel since 2.6. They are packaged in most distros' repositories and are the backend to encrypting during manual partition setup through Parted or GParted. eCryptfs is filesystem encryption and encrypting with dm_crypt, LUKS and Cryptsetup is block-level encryption. What does that mean? Let’s compare and contrast the two methods. If you found this page but were really looking for full disk encryption, then see here
+What is eCryptfs?
+
+eCryptfs is one of several implementations of filesystem encryption, similar to EncFS. It originated in part from IBM in 2009, it’s default enabled in Google’s Chrome OS and eCryptfs is what Ubuntu’s desktop installer uses when you choose to encrypt your home directory when entering your username and password during installation. As Canonical developer and eCryptfs package maintainer Dustin Kirkland says in this interview, “The real goal of eCryptfs is to protect your data if your computer or hard disk is stolen.”
+
+When installing Ubuntu or its derivatives, you check the box to encrypt /home and that’s literally all you need to do. ecryptfs-setup-private is the configuration script used which gives you AES in XTS-plain with a 128 bit key size and SHA256 password hashing. If you have a swap area, the installer even encrypts that too with dm_crypt.
+
+If your distro of choice doesn't have an option like this, there is manual setup which is more tedious but lets you customize the configuration. If you want eCryptfs but have already installed your distro, there are guides to walk you through migrating to an eCryptfs encrypted home. Here are two: [1] [2]
+Benefits of eCryptfs
+
+    With the default script and installer, a PAM module automatically decrypts the filesystem when you log in to your account.
+    On computers with multiple user accounts, when one user logs in, the other users’ data remains encrypted.
+    Multiple user accounts can share encrypted files.
+    Supports authentication with multiple keys (both files and passwords) from multiple sources.
+    Supports AES-NI.
+    Encryption happens in the kernel, not in userspace like with EncFS, and does not require FUSE.
+    Supports AES, Twofish, Blowfish, Triple DES and Cast 5 & 6.
+    Does not require its own block space or partition.
+    No need to change anything for your incremental file backups.
+    Can be used to encrypt the contents of cloud storage accounts, independent of the specific service provider.
+    So easy to do on a new installation, even total noobs have little excuse not to use it.
+
+Disadvantages of eCryptfs
+
+    Filesystem encryption leaks information. An attacker can mount /home and view the filesystem’s hierarchy and the size, permissions and date modified of all encrypted files.
+    The ecryptfs-setup-private script (and thus, Ubuntu’s installer) does not encrypt file names. It can be done, but you must do a manual configuration of eCryptfs.
+    eCryptf is only a single-threaded process so the CPU isn't fully taken advantage of.
+    Can be tricky to get working with non-standard (NTFS, FAT, ext) filesystems.
+    Filesystem encryption can not be obscured in a sea of random data like block level encryption can.
+    Filesystem encryption stores the decryption key within the filesystem itself, though encrypted.
+
+I’d say Dustin Kirkland’s outlook on eCryptfs is quite realistic. I don't see why file names are not encrypted from the start, but I find no fault in giving people ultra simple data encryption as eCryptfs does, even if the threat model is primarily computer thieves, presumably with no crypto or forensics knowledge and/or need for such information. However, outside that area of general protection, eCryptfs would not be appropriate.
+
+What is dm_crypt/Cryptsetup/LUKS?
+
+They’re three different things which are used for block-level and device encryption in Unix systems. dm_crypt is the backend kernel module while LUKS and Cryptsetup are controllers to create and manipulate your volumes and key files. The combination of the three is often just referred to as 'encrypting with LUKS'.
+
+LUKS encryption is built into desktop and alternate installers to various degrees. Often LUKS encryption is paired with LVM setup which can be unnecessary if you have no use for logical volume management or more than 4 primary partitions. The default Cryptsetup settings use LUKS and give you AES_256 in XTS-plain64 mode and SHA1 password hashing.
+Benefits
+
+    Block-level encryption does not leak information about your filesystem. If you mount a LUKS device when it’s closed, you can only see a blob of unintelligible data.
+    Block-level and device encryption have less of an impact on performance than filesystem encryption.
+    Supports AES-NI and encryption happens in the kernel.
+    Supports authentication with up to 8 keys (both files and passwords) from different sources.
+    Supports many different ciphers, modes and key specifications, including all AES finalists.
+    Can encrypt the system, home and swap partitions individually.
+    Compatible with Truecrypt containers.
+    Also so easy to do on a new installation, there's little reason not to for mobile devices.
+
+Disadvantages
+
+    More difficult to manually set up than filesystem encryption.
+    Default settings (Cryptsetup + LUKS) use SHA1 for key hashing which cannot be changed from within the installer, be they desktop or alternate. There's consolation in the fact that key generation uses PBKDF2 (tens to hundreds of thousands of iterations). Still, it's becoming time to move on to SHA3.
+    The decryption key or passphrase is needed to fully boot the computer. For multiple user accounts, everyone’s data is decrypted on login and all users must have the decryption key(s).
+    dm_crypt is single-threaded.
+    A LUKS header includes the volume header and all key slots. If a header or a key slot becomes damaged, all data on the device will be irrecoverable. It is vital that you create backups of your LUKS header (and don’t store it on the same encrypted partition).
+    If you encrypt your whole system in separate partitions (for example: /, /home and swap), you will have at least two decryption keys to enter on boot and when resuming from hibernation: one for / and one for swap. That's not including your user password once you get past the encryption, but it does assume that you either automatically decrypt home with a key file, or are on a distro using systemd.
+
+The biggest arguments for block level encryption are the performance advantage and the lack of any indication of what may be inside the encrypted volume. Also, I am of the religion that you should have separate root and home partitions on non-server systems. This gives you more flexibility with fstab and if your system partition breaks or becomes too cluttered, you can reimage it and not worry about loosing personal data.
+
+The Main Event
+
+Alas, here is the point of this page: step-by-step instructions for encrypting your /home and swap partitions with dm_crypt, Cryptsetup and LUKS&—but in a manner unconfined to Cryptsetup's default settings. Included as well are more mundane benefits like intuitive volume naming (ex. home instead of sda2_crypt), not to mention that you can do this on existing systems without reinstalling anything or even needing a live session.
+
+The only prerequisite is that since dm_crypt is block or device encryption, /, /home and swap must all be separate partitions. If you use swap with an encrypted home, the swap partition or file must somehow be encrypted too or everything moved into it will be plaintext, easily recoverable until those drive sectors are overwritten enough times, which could take a very long time to happen.
+
+These directions will give you hibernation as well. If you don't use swap or hibernate, ignore where they're mentioned. If you do want a swap area but don't use hibernation, skip where a swap partition is mentioned in the numbered instructions. You can instead use a swap file created after your encrypted /home partition is all set up. For this, see the More Swap area at the bottom of the page.
+
+Last but not least: This process will completely destroy all data on the designated drives or partitions. Back up your personal and config files before going further.
+
+Step 1 - Install Cryptsetup
+
+First thing to do is make sure you have Cryptsetup on the system. If you do need it, install while in your normal user account instead of later in the root shell so you're not exposing it to the internet.
+
+
+sudo apt-get install cryptsetup
+	
+
+
+Step 2 - Prepare Noise Fill
+
+You ideally want to fill the hard drive with nonsense data so that your encrypted block devices are indistinguishable from free space. If you're starting with a blank drive, do the whole thing, even if you plan to install other operating systems. If you want to preserve other systems already installed, then only fill the partitions you plan to encrypt.
+
+You have two options to do this. Sourcing /dev/urandom is commonly suggested for filling and gives you a background of random data. The downside is that it is extremely slow, writing in the area of 10-20 MB per second even on platter drives with 4K sectors. That can work out to a day or more for the operation to complete on a single drive.
+
+Another point is that random data and encrypted data are not the same and in this scenario, sourcing such high quality entropy (well, as quality as a default system can get) is very unnecessary. You're not generating encryption keys with this, you're only masking where encrypted data is on the hard drive.
+
+The second and less common option uses /dev/urandom, /dev/zero and OpenSSL to fill with an AES encrypted data stream at your drive's normal write speed. This can still take a while for large drives, but is naturally a fraction of what's needed for urandom. This method is especially appropriate if you choose AES for your encrypted partitions because then you're hiding AES ciphertext in, wait for it...AES ciphertext!
+
+There are no security implications with one method over the other because filler data has no impact on the encrypted partitions' integrity or the encrypted data inside. OpenSSL can't do other block ciphers in counter mode though, so AES it is, but this isn't a concern because, again to drive the point home, you're only writing noise to the storage device.
+
+The command below creates a 128 byte encryption key seeded from urandom. /dev/zero is used to fill the drive but AES-256 in CTR mode is used to encrypt /dev/zero's output with the urandom key before anything is written to disk. The result is a device filled with AES ciphertext. You'll want a root terminal for this or use sudo -i.
+
+
+openssl enc -aes-256-ctr -pass pass:"$(dd if=/dev/urandom bs=128 count=1 2>/dev/null | base64)" -nosalt < /dev/zero > /dev/sdxy
+	
+
+
+If you specifically want to fill with urandom, it's your choice. Here's that familiar dd command. If you're worried about urandom eventually depleting and then looping its entropy pool, don't be.
+
+
+sudo dd if=/dev/urandom of=/dev/sdxy bs=4096
+	
+
+
+To fill, you can either attach the drive to an already installed system by USB/SATA/etc. and work from there, or boot into a live session. For either method, you'll know it's nearly completed when it warns 'no space left on device'.
+
+Step 3 - Recovery Mode
+
+When all is finished with drive filling, boot into recovery mode or if you have the root account enabled, boot into that. Here are instructions for how to do it. In recovery mode, notice you only have read access to the filesystem. You need write access too so remount the system partition.
+
+
+mount -o remount,rw /
+	
+
+
+Now you should be here (the "state: read-only" part won't change):
+
+
+Step 4 - Cryptsetup
+
+Create the new encrypted partitions. The command below gives you an equivalent to the eCryptfs default crypto strength, the only difference is that I changed the XTS mode to plain64 from plain which allows for volumes greater than 2TB. Notice the key size says 256, this is because of how XTS mode works. Half of the key space is for the key itself and the other half used by the cipher mode so this results in a 128 bit key. If you want a 256 bit key in XTS mode with any cipher, you would set the key size to 512. Other cipher modes don't need this exception.
+
+Remember, this is just one of many possible combinations. For the minimal threat model of keeping info safe from ordinary theft, it’s a solid choice. Since we have /home and swap to encrypt, run the luksFormat command on each partition.
+
+
+cryptsetup luksFormat --cipher aes-xts-plain64 --key-size 256 --hash sha256 /dev/sdxy
+	
+
+
+Now that you have encrypted home and swap volumes, open and name them home and swap (or whatever you want).
+
+
+cryptsetup luksOpen /dev/sdxy home
+
+cryptsetup luksOpen /dev/sdxy swap
+	
+
+
+Make an ext 4 filesystem inside and a swap area.
+
+
+mkfs.ext4 /dev/mapper/home
+
+mkswap /dev/mapper/swap
+	
+
+
+
+Step 5 - fstab
+
+fstab tells the system which partitions to automatically mount on boot and with what filsystem attributes. Since we now have totally new identifiers for our encrypted partitions, we must update fstab with them.
+
+
+nano /etc/fstab
+	
+
+
+Replace the UUIDs with /dev/mapper/home and /dev/mapper/swap. When finished, it should look similar to this:
+
+Then press Control+X to exit nano, Y to confirm and Enter to save the changes.
+
+Step 6 - crypttab
+
+The crypttab file tells the system which are your encrypted volumes. Since we created these volumes after the system was already installed, there won't be a crypttab file. We'll need to create it but first we need the encrypted partitions' block identifiers because we don't want to use device names here like /dev/sda2.
+
+
+blkid
+	
+
+
+The UUIDs you want will say crypto_luks at the end. Put them into crypttab.
+
+
+nano /etc/crypttab
+	
+
+
+When finished, your crypttab file should look something like below. Change the end of a partition's entry to "luks,discard" if it's on an SSD and make sure swap's crypttab entry says "swap" at the end. This swap option means the mkswap command is run on each boot after the volume is opened so there's no chance of anything in swap surviving a reboot. Press Control+X to exit nano, Y to confirm and then Enter to save.
+
+
+Step 7 - Mark Your Territory
+
+Mount your new /home.
+
+
+mount /dev/mapper/home
+	
+
+
+If you run ls /home, you’ll see only lost+found inside. You must make a new home folder for your user account. Documents, Music, etc. will be magically recreated on its own thanks to the package xdg-user-dirs, which desktop installations come with.
+
+
+mkdir /home/your_username
+	
+
+
+Finally, take ownership and set file and folder permissions.
+
+
+chown -R your_username /home/your_username
+	
+
+
+
+chmod 750 /home/your_username
+	
+
+
+
+Step 8 - Fix Hibernation
+
+We now want to set the resume target for coming out of hibernation. Take a look at:
+
+
+nano /etc/initramfs-tools/conf.d/resume
+	
+
+
+If you see "RESUME=UUID=somelongdeviceidentifier", that's the UUID of your old unencrypted swap device. You don't want that. You want to resume from your encrypted swap so change it to:
+
+
+RESUME=/dev/mapper/swap
+	
+
+
+Now to finish everything off, generate a new boot filesystem image.
+
+
+update-initramfs -u
+	
+
+
+
+Step 9 - Verify
+
+Check the LUKS header to see if everything is okay.
+
+
+cryptsetup luksDump /dev/sdxy
+	
+
+
+Here is what the header contents look like. You can see the cipher, hashing with the number of PBKDF2 iterations and the used key slot. Looks good.
+
+
+Step 10 - LUKS Header Backup
+
+Now back up /home's LUKS header. Do not skip this! The command below puts the header image on your Desktop, it will be owned by root. Leave it that way and move it to external storage.
+
+
+Cryptsetup luksHeaderBackup /dev/sdxy --header-backup-file /home/your_username/Desktop/FILENAME.img
+	
+
+
+That’s it! Type reboot, press Enter and then have a cookie. You deserve it. If all went well, you will be asked for the partitions' decryption passwords (you won’t have a cropped screen, that’s because of Virtualbox):
+
+Extra Tips
+General Troubleshooting
+
+If all did not go well, you’ll have the choice to skip mounting or enter manual recovery. If an encrypted volume won't mount on boot, it's probably the wrong UUID in crypttab or something wrong in fstab. Just go back into recovery mode, check the blkid again and that crypttab and fstab are as they should be. Worst case scenario: you must start over from Step 3, though this shouldn't happen.

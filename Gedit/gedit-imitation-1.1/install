@@ -1,0 +1,38 @@
+#!/usr/bin/python
+
+import os
+import shutil
+from os import path
+from subprocess import Popen
+
+# Settings
+plugin_dir = '/usr/lib/gedit/plugins'
+gschema_dir = '/usr/share/glib-2.0/schemas'
+gschema_file = 'org.gnome.gedit.plugins.imitation.gschema.xml'
+
+# Check root user
+if os.getuid() != 0:
+    raise Exception("You are not root")
+
+# Check folders exist
+items = (
+    'imitation',
+    'imitation.plugin',
+    gschema_file,
+    gschema_dir,
+    plugin_dir,
+)
+for item in items:
+    if not path.exists(item):
+        raise Exception(item + "doesn't exist")
+
+# Install gschema
+shutil.copy(gschema_file, gschema_dir + '/' + gschema_file)
+Popen('glib-compile-schemas ' + gschema_dir, shell=True)
+
+# Install plugin
+shutil.copytree('imitation', plugin_dir + '/imitation')
+shutil.copy('imitation.plugin', plugin_dir + '/imitation.plugin')
+
+print 'Imitation installed. Please now activate in gedit preferences.'
+

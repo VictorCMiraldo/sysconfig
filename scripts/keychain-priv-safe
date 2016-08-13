@@ -1,0 +1,16 @@
+#! /bin/bash
+
+#
+# compresses private and keychain folders
+# encrypts then with our root key and
+# adds the resulting file to ~/safe.
+#
+# shreds the auxiliary files.
+#
+
+if [ $# -ne 0 ]; then exit 1; fi
+
+fname=$(date +%y%m%d-keychain-priv)
+tar -zcf $HOME/tmp/"$fname.tar.gz" $HOME/usr/keychain $HOME/usr/priv \
+  && gpg -r $KEYCHAIN_ROOT --output $HOME/safe/$fname -e $HOME/tmp/"$fname.tar.gz" \
+  && shred --remove $HOME/tmp/"$fname.tar.gz"

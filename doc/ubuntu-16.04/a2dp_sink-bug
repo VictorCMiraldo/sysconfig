@@ -1,0 +1,37 @@
+-- BETTER
+
+connect speaker through blueman, and then run:
+
+$ pactl load-module module-loopback \
+        source=bluez_source.0C_A6_94_7B_8C_BB \ 
+        sink=alsa_output.pci-0000_00_1b.0.analog-stereo
+
+
+-- OLD
+
+To use a2dp_sink profile, we needto connect EXPLICETELY through
+bluetoothctl
+Example session:
+
+victor:~$ sudo bluetoothctl
+[sudo] password for victor: 
+[NEW] Controller C8:F7:33:34:F6:83 logos [default]
+[bluetooth]# scan on
+Discovery started
+[CHG] Controller C8:F7:33:34:F6:83 Discovering: yes
+[NEW] Device 0C:A6:94:7B:8C:BB JBL Flip 2
+[NEW] Device 88:C6:26:40:B5:C7 88-C6-26-40-B5-C7
+[bluetooth]# connect 0C:A6:94:7B:8C:BB
+Attempting to connect to 0C:A6:94:7B:8C:BB
+[CHG] Device 0C:A6:94:7B:8C:BB Connected: yes
+[CHG] Device 0C:A6:94:7B:8C:BB UUIDs: 00001108-0000-1000-8000-00805f9b34fb
+[CHG] Device 0C:A6:94:7B:8C:BB UUIDs: 0000110b-0000-1000-8000-00805f9b34fb
+[CHG] Device 0C:A6:94:7B:8C:BB UUIDs: 0000110c-0000-1000-8000-00805f9b34fb
+[CHG] Device 0C:A6:94:7B:8C:BB UUIDs: 0000110e-0000-1000-8000-00805f9b34fb
+[CHG] Device 0C:A6:94:7B:8C:BB UUIDs: 0000111e-0000-1000-8000-00805f9b34fb
+[CHG] Device 0C:A6:94:7B:8C:BB Paired: yes
+Connection successful
+[JBL Flip 2]# exit
+[DEL] Controller C8:F7:33:34:F6:83 logos [default]
+
+Now we go to blueman and set the profile as we want... LOL

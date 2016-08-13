@@ -1,0 +1,5 @@
+#! /bin/bash
+
+## Generates a file tagged only by month.
+if [[ "$#" -ne "1" ]]; then exit 1; fi
+echo "$HOME/var/log/$(date +%m-$1.log)"

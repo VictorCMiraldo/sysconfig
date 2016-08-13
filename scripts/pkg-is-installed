@@ -1,0 +1,26 @@
+#! /bin/bash
+
+showHelp() {
+  echo "usage: pkg-is-installed <pkgname>"
+  echo ""
+  echo "  pkg-is-installed returns 1 if <pkgname> is"
+  echo "  installed in this system. Returns 0 otherwise"
+  echo ""
+  echo "example:"
+  echo ""
+  echo "  if $(pkg-is-installed gimp); then"
+  echo "    do-stuff-with-gimp"
+  echo "  fi"
+}
+
+if [[ ! $# -eq 1 ]]; then
+  showHelp
+  exit 1
+fi
+
+RES=$(apt-cache policy $1 | grep "Installed:" | grep -v "(none)")
+if [ ! -z "$RES" ]; then
+  exit 0
+else
+  exit 1
+fi

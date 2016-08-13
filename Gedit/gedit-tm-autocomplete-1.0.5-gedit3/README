@@ -1,0 +1,13 @@
+TextMate style autocompletion for Gedit
+=======================================
+
+Gedit 3 Plugin for TextMate style autocompletion. Tap 'Esc' to cycle through 
+the available completions
+
+Installation
+------------
+
+Run ./install.sh 
+
+You will be asked to enter your sudo password; this is needed to install the
+settings schemas.

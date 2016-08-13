@@ -1,0 +1,36 @@
+#! /bin/bash
+
+function showUSage() {
+  echo "ctl-audio <play|pause|next|prev|stop>"
+  echo
+  echo "simple alias to xdotool to send keyboard"
+  echo "signals"
+  echo ""
+}
+
+if [[ $# -ne 1 ]]; then
+  showUsage
+  exit 1
+fi
+
+case $1 in
+  play)
+    xdotool key "XF86AudioPlay"
+  ;;
+  pause)
+    xdotool key "XF86AudioPause"
+  ;;
+  next)
+    xdotool key "XF86AudioNext"
+  ;;
+  prev)
+    xdotool key "XF86AudioPrev"
+  ;;
+  stop)
+    xdotool key "XF86AudioStop"
+  ;;
+  *)
+    showUsage
+    exit 1
+  ;;
+esac

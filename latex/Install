@@ -1,0 +1,35 @@
+#! /bin/bash
+
+##
+## Takes care of installing a decent selection of
+## latex functionality
+## 
+echo "-- LaTeX:"
+if [ ! -s $HOME/var/state/cfg.latex ]; then
+  
+  #can we install such packages?
+  scripts/pkg-check -f latex/packages
+  
+  if [ "$?" -ne "0" ]; then
+    echo "    Aborting" 
+    echo "      Some packages might not be available for install."
+    exit 1
+  fi
+  
+  #if we can, great! Let's proceed to do so.
+  PKG=""
+  for pkg in $(cat latex/packages); do
+    PKG="$PKG $pkg"
+  done
+  
+  sudo apt-get install -y $PKG
+  
+  echo 'echo "1" > $HOME/var/state/cfg.latex' | sudo bash
+  
+  # To finish it off, we link our latex stuff.
+  ln -s "$(pwd)/latex/lib" $HOME/lib/latex
+  
+  echo "    installed"
+else
+  echo "    skipping"
+fi

@@ -1,0 +1,49 @@
+#! /bin/bash
+
+##
+## Will install packages from BasePackages
+##
+##
+echo "-- General Packages"
+echo "    Checking current state"
+if [ ! -e $HOME/var/state/cfg.basepkgs ]; then
+  echo "      Didn't exist. Creating one"
+  echo "touch $HOME/var/state/cfg.basepkgs" | sudo bash
+else
+  echo "      Ok, reading it"
+fi
+
+## Our system differs on the following
+__WANT=$($HOME/config/scripts/cfg-linesof BasePackages | sort)
+__HAVE=$($HOME/config/scripts/cfg-linesof $HOME/var/state/cfg.basepkgs | sort)
+rm -f NeededPkgs
+for want in $__WANT; do
+  if [[ ! $__HAVE =~ $want ]]; then
+    echo $want >> NeededPkgs
+  fi
+done
+
+if [ -s ./NeededPkgs ]; then
+
+  echo "    Proceeding to installation"
+  
+  $HOME/config/scripts/pkg-check -f NeededPkgs
+  
+  if [ "$?" -ne "0" ]; then
+    echo "    Aborting" 
+    echo "      Some packages might not be available for install."
+    exit 1
+  fi
+
+  #if we can, great! Let's proceed to do so.
+  PKG=""
+  for pkg in $(cat NeededPkgs); do
+    PKG="$PKG $pkg"
+  done
+  
+  sudo apt-get install -y $PKG
+  
+  echo "echo -e '$PKG' >> $HOME/var/state/cfg.basepkgs" | sudo bash
+else
+  echo "    No packages are needed"
+fi

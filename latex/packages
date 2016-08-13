@@ -1,0 +1,15 @@
+texlive
+texlive-base
+texlive-binaries
+texlive-fonts-extra
+texlive-fonts-recommended
+texlive-latex-base
+texlive-latex-extra
+texlive-latex-recommended
+texlive-math-extra
+texlive-pictures
+texlive-science
+latex-beamer
+latex-xcolor
+latexmk
+rubber

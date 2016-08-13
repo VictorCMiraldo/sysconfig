@@ -1,0 +1,19 @@
+#! /bin/bash
+
+function showUsage() {
+  echo "my-convert <path> <opts-convert>"
+  echo ""
+  echo "Will run convert with a different cache"
+  echo "and limit memory usage to 256mb"
+  echo ""
+}
+
+if (( $# < 2 )); then
+  showUsage
+  exit
+fi
+
+TMP=$1
+shift
+
+convert -define registry:temporary-path=$TMP -limit memory 256mb $@

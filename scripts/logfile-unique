@@ -1,0 +1,5 @@
+#! /bin/bash
+
+## Generates a completely unique filename for logging
+if [[ "$#" -ne "1" ]]; then exit 1; fi
+echo "$HOME/var/log/$(date +%y%m%d-$1-%H%M%S.log)"
