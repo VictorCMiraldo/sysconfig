@@ -10,6 +10,7 @@ fi
 
 HERE=$HOME/config/ownCloud
 OWNCLOUD=$HOME/.local/share/data/ownCloud
+mkdir -p $OWNCLOUD
 ##
 ## ownCloud syncExlucde list
 ##
