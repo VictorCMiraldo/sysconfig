@@ -20,7 +20,15 @@ case $SRC in
   ;;
 esac
 
-RSYNC_OPTS="-rtpEh --progress --safe-links --exclude-from=$HOME/config/rsync/folder-backup.exc --include-from=$HOME/config/rsync/folder-backup.inc ${@:2}"
+# Options:
+# -r : recursive
+# -t : preserve times
+# -p : perserve permissions
+# -E : preserve executability
+# -h : human readable
+
+RSYNC_OPTS="-rtpEhl --progress --safe-links --exclude-from=$HOME/config/rsync/folder-backup.exc --include-from=$HOME/config/rsync/folder-backup.inc ${@:2}"
+RSYNC_OPTS_MIRROR="$RSYNC_OPTS --delete"
 
 echo "  SYSBCKP"
 echo "  ======="
@@ -82,43 +90,35 @@ echo "CPYDATA=$CPYDATA; CPYPRIV=$CPYPRIV" >> $LOGFILE
 echo "" >> $LOGFILE
 echo "  $RSYNC_OPTS" >> $LOGFILE
 
-rsync $RSYNC_OPTS $HOME/bin $DST
+rsync $RSYNC_OPTS_MIRROR $HOME/bin $DST
 echo "bin: ok" >> $LOGFILE
 
-rsync $RSYNC_OPTS $HOME/config $DST
+rsync $RSYNC_OPTS_MIRROR $HOME/config $DST
 echo "config: ok" >> $LOGFILE
 
 rsync $RSYNC_OPTS $HOME/safe $DST
 echo "safe: ok" >> $LOGFILE
 
-rsync $RSYNC_OPTS $HOME/work $DST
+rsync $RSYNC_OPTS_MIRROR $HOME/work $DST
 echo "work: ok" >> $LOGFILE
 
-if $CPYPRIV && $CPYDATA; then
+rsync $RSYNC_OPTS_MIRROR $HOME/usr/pub $DST/usr
+echo "usr/pub: ok" >> $LOGFILE
 
-  rsync $RSYNC_OPTS $HOME/usr $DST
-  echo "usr: ok" >> $LOGFILE
+if $CPYPRIV; then
 
-else
+  rsync $RSYNC_OPTS_MIRROR $HOME/usr/keychain $DST/usr
+  echo "usr/keychain: ok" >> $LOGFILE
 
-  rsync $RSYNC_OPTS $HOME/usr/pub $DST/usr
-  echo "usr/pub: ok" >> $LOGFILE
+  rsync $RSYNC_OPTS $HOME/usr/priv $DST/usr
+  echo "usr/priv: ok" >> $LOGFILE
 
-  if $CPYPRIV; then
+fi
+if $CPYDATA; then
 
-    rsync $RSYNC_OPTS $HOME/usr/keychain $DST/usr
-    echo "usr/keychain: ok" >> $LOGFILE
+  rsync $RSYNC_OPTS $HOME/usr/data $DST/usr
+  echo "usr/data: ok" >> $LOGFILE 
 
-    rsync $RSYNC_OPTS $HOME/usr/priv $DST/usr
-    echo "usr/priv: ok" >> $LOGFILE
-
-  fi
-  if $CPYDATA; then
-
-    rsync $RSYNC_OPTS $HOME/usr/data $DST/usr
-    echo "usr/data: ok" >> $LOGFILE 
-
-  fi
 fi
 
 echo "Done!"
