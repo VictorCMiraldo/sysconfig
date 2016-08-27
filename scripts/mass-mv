@@ -10,7 +10,9 @@ function showUsage() {
   echo "  for the counter."
   echo ""
   echo "Example:"
-  echo "  mass-mv \"*.JPG\" \"pics_travel_{}.jpg\""
+  echo "  mass-mv \".*\\.jpg\" \"pics_travel_{}.jpg\""
+  echo ""
+  echo "  DONT FORGET THAT FIRST ARGUMENT IS REGEXP!"
 }
 
 if (( $# != 2 )); then
@@ -21,7 +23,16 @@ fi
 PATIN=$1
 PATOUT=$2
 
-if [[ ".*\{\}.*" =~ $PATOUT ]]; then
+if [[ ! $PATOUT =~ .*\{\}.* ]]; then
   echo "You forgot the counter placeholder!"
   exit 1
 fi
+
+X=0
+for i in $(ls); do
+  if [[ $i =~ $PATIN ]]; then
+    o=${PATOUT/"{}"/`printf "%03d" $X`}
+    X=$((X + 1))
+    mv $i $o
+  fi
+done
