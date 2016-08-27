@@ -1,0 +1,27 @@
+#! /bin/bash
+
+function showUsage() {
+  echo "mass-mv \"pattern-from\" \"pattern-to\""
+  echo ""
+  echo "  Will move every file that matches 'pattern-from'"
+  echo "  in the current directory into 'pattern-to'."
+  echo ""
+  echo "  The string '{}' in 'pattern-to' is used as a placeholder"
+  echo "  for the counter."
+  echo ""
+  echo "Example:"
+  echo "  mass-mv \"*.JPG\" \"pics_travel_{}.jpg\""
+}
+
+if (( $# != 2 )); then
+  showUsage
+  exit 1
+fi
+
+PATIN=$1
+PATOUT=$2
+
+if [[ ".*\{\}.*" =~ $PATOUT ]]; then
+  echo "You forgot the counter placeholder!"
+  exit 1
+fi
